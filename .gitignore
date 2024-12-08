@@ -189,7 +189,8 @@ coverage.xml
 .hypothesis/
 .pytest_cache/
 cover/
-
+db.sqlite3-shm
+db.sqlite3-wal
 # Translations
 *.mo
 *.pot

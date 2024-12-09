@@ -43,10 +43,14 @@ class Idea(Model):
     def __str__(self):
         return self.description
 
+class Answers(Model):
+    id = fields.IntField(primary_key=True)
+    answer = fields.CharField(max_length='128')
+
 class Question(Model):
     id = fields.IntField(primary_key=True)
     text = fields.TextField()
-    idea = fields.ForeignKeyField('models.Idea', related_name='questions')
+    answers = fields.ManyToManyField('models.Answers', related_name='Question')
 
     def __str__(self):
         return self.text

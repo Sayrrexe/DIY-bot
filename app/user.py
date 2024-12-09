@@ -167,3 +167,6 @@ async def cmd_unfavorite_idea(callback: CallbackQuery, state: FSMContext):
     except Exception as e:
         logger.error(f"Ошибка при обновлении клавиатуры (удаление из избранного): {e}")
         await callback.message.answer('Не удалось обновить клавиатуру. Попробуйте позже.')
+        
+        
+# ----- Свечи -----

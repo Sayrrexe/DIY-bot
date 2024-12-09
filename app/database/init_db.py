@@ -1,7 +1,7 @@
 from email.mime import image
 import logging
 
-from app.database.models import Material, Idea
+from app.database.models import Material, Idea, Question, Answers
 
 
 logger = logging.getLogger(__name__)
@@ -137,6 +137,24 @@ ideas_data.extend([
 ])
 
 
+answers = ['в виде ракушки','в виде розы', 'в виде листа', 'в виде сердца','Лавандовый','Мятно-зелёный','Нежно-розовый','Тёплый бежевый', 'Эфирные масла','блёстки','Сухие лепестки цветов','Глицерин']
+
+questions = [
+    {
+        'text': 'Какую форму хотите?',
+        'answers': ['в виде ракушки', 'в виде розы', 'в виде листа', 'в виде сердца']
+    },
+    {
+        'text': 'Какой хотите цвет?',
+        'answers': ['Лавандовый', 'Мятно-зелёный', 'Нежно-розовый', 'Тёплый бежевый']
+    },
+    {
+        'text': 'Какие дополнительные элементы хотите добавить?',
+        'answers': ['Сухие лепестки цветов', 'Эфирные масла', 'блёстки', 'Глицерин']
+    }
+]
+
+
 async def create_data():
     materials = {material['name']: await Material.create(**material) for material in materials_data}
 
@@ -146,6 +164,18 @@ async def create_data():
         idea_materials = [materials[material_name] for material_name in idea_data['materials']]
         idea = await Idea.create(description=idea_data['description'], instruction=idea_data['instruction'], image=idea_data['image'])
         await idea.materials.add(*idea_materials)
+        
+    answer_objects = {}
+    for ans in answers:
+        answer_obj = await Answers.create(answer=ans)
+        answer_objects[ans] = answer_obj
+
+    # Теперь создаём вопросы и прикрепляем к ним ответы
+    for q_data in questions:
+        q_obj = await Question.create(text=q_data['text'])
+        # Получаем объекты ответов для данного вопроса
+        q_answers = [answer_objects[a] for a in q_data['answers']]
+        await q_obj.answers.add(*q_answers)
 
     logger.info("Успешное заполнение БД!")
 

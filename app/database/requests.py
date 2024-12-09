@@ -70,4 +70,46 @@ async def delete_favorite(tg_id: int,iid: int):  # создание пользо
     if favorite:
         await favorite.delete()
     return True
+
+async def get_soap_img(data):
+    mapping = {
+    '1': 'rose',
+    '2': 'sheet',
+    '3': 'heart',
+    '4': 'lavand',
+    '5': 'green',
+    '6': 'pink',
+    }
+    
+    first = data['color']  
+    second = data['form']
+    
+    first_name = mapping[second]
+    second_name = mapping[first]
+    path = f'media/soap/{first_name}/{second_name}.webp'
+    return path
+
+async def get_soap_text(data):
+    mapping = {
+    '1': 'в виде розы',
+    '2': 'в виде листа',
+    '3': 'в виде сердца',
+    '4': 'лавандового',
+    '5': 'Мятно-зелёного',
+    '6': 'Нежно-розового',
+    '7': 'Эфирных маслов',
+    '8': 'блёсток',
+    '9': 'Глицерина для увлажняющего эффекта'
+    }
+    
+    color = data['color']  
+    form = data['form']
+    additives = data['additives']
+    
+    color_text = mapping[color]
+    form_text = mapping[form]
+    additives_text = mapping[additives]
+    
+    text = f'Вот так бы выглядело ваше мыло {form_text}, {color_text} цвета с добавлением {additives_text}🔥❤️‍🔥'
+    return text
         

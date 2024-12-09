@@ -204,8 +204,24 @@ async def cmd_unfavorite_idea(callback: CallbackQuery, state: FSMContext):
     await callback.message.delete()
     answer_id = callback.data.split("_")[2]
     await state.update_data(additives = answer_id)
-    print(await state.get_data())
+    data = await state.get_data()
+    path = await req.get_soap_img(data)
+    text = await req.get_soap_text(data)
+    
+    if path and os.path.exists(path):
+        try:
+            await callback.message.answer_photo(
+                photo=FSInputFile(path, filename="idea_image.png"), 
+                caption=text,
+            )
+        except Exception as e:
+            logger.error(f"Ошибка при отправке фото: {e}")
+            await callback.message.answer(f'При отправке фото произошла ошибка, мы уже передали её разработчикам!\n {text}')
+        
+    await state.clear()
     
     
+# ----- личный кабинет -----
+
 
 

@@ -50,20 +50,16 @@ async def materials_kb():
             InlineKeyboardButton(text=material_name, callback_data=f'{callback_prefix}_{finish_text}')
         )
         
-    if counter % 3 == 1:
-        keyboard.add(InlineKeyboardButton(text=' ', callback_data='ignore'))
-        keyboard.add(InlineKeyboardButton(text=' ', callback_data='ignore'))  
-    elif counter % 3 == 2:
-        keyboard.add(InlineKeyboardButton(text=' ', callback_data='ignore'))
+    if counter % 2 == 1:
+        keyboard.add(InlineKeyboardButton(text=' ', callback_data='ignore')) 
 
     # Добавляем функциональные кнопки управления
     keyboard.add(InlineKeyboardButton(text='Сбросить◀️', callback_data='clear_materials'))
-    keyboard.add(InlineKeyboardButton(text='🏜️', callback_data='ignore'))
     keyboard.add(InlineKeyboardButton(text='Отмена❌', callback_data='skip'))
     keyboard.add(InlineKeyboardButton(text='Принять ✅', callback_data='accept_materials'))
 
     # Выравнивание по 3 столбца
-    return keyboard.adjust(3).as_markup()
+    return keyboard.adjust(2).as_markup()
 
 async def ideas_kb(ideas):
     """

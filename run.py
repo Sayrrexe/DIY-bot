@@ -9,7 +9,7 @@ from tortoise import Tortoise
 
 from app.user import user
 from config import TOKEN, DB_URL
-from app.database.init_db import create_data 
+from app.database.init_db import create_data
 
 logger = logging.getLogger(__name__)
 bot = Bot(token=TOKEN, default=DefaultBotProperties(parse_mode=ParseMode.HTML))
@@ -17,7 +17,8 @@ bot = Bot(token=TOKEN, default=DefaultBotProperties(parse_mode=ParseMode.HTML))
 
 async def is_db_empty():
     # Проверка на пустоту базы данных (например, если нет записей в одной из таблиц)
-    from app.database.models import Material  
+    from app.database.models import Material
+
     count = await Material.all().count()
     return count == 0
 
@@ -29,13 +30,11 @@ async def startup(dispatcher: Dispatcher):
     )
     await Tortoise.generate_schemas()
 
-    
     if await is_db_empty():
         logger.info("База данных пуста. Инициализация...")
-        await create_data()  
+        await create_data()
     else:
         logger.info("БД уже заполнена!")
-   
 
 
 async def shutdown(dispatcher: Dispatcher):

@@ -2,6 +2,7 @@ import logging
 import re
 
 from typing import List
+from webbrowser import get
 
 from tortoise.exceptions import DoesNotExist
 from app.database.models import Favorite, User, Material, Idea
@@ -16,6 +17,79 @@ logger = logging.getLogger(__name__)
 async def create_user(tg_id: int):  # создание пользователя
     user = await User.get_or_create(tg_id=tg_id)
     return
+
+async def is_user_auth(tg_id: int):
+    try:
+        user = await User.get(tg_id=tg_id)
+        if user:
+            return True
+    except DoesNotExist:
+        return False
+
+async def delete_my_account(tg_id: int):
+    try:
+        user = await User.get(tg_id=tg_id)
+        # Удаляем связанные избранные записи
+        await Favorite.filter(user=user).delete()
+        # Теперь удаляем пользователя
+        await user.delete()
+        return True
+    except DoesNotExist:
+        return False
+
+    
+async def get_count_user_favorite(tg_id):
+    try:
+        user = await User.get(tg_id=tg_id)
+        if user:
+            count = await Favorite.filter(user=user).count()
+            return count
+        else:
+            return False
+    except DoesNotExist:
+        return False
+    
+async def is_idea_favorite(tg_id, iid):
+    try:
+        user = await User.get(tg_id=tg_id)
+        idea = await Idea.get(id=iid)
+        if user:
+            is_favorite = await Favorite.get(user=user, idea=idea)
+            if is_favorite:
+                return True
+            else:
+                return False
+        else:
+            return False
+    except DoesNotExist:
+        return False
+    
+async def add_to_favorite(tg_id, iid):
+    try:
+        user = await User.get(tg_id=tg_id)
+        idea = await Idea.get(id=iid)
+        # Проверяем, есть ли уже запись
+        is_exist = await Favorite.filter(user=user, idea=idea).exists()
+        if not is_exist:
+            await Favorite.create(user=user, idea=idea)
+            return True
+        else:
+            return True  # Уже есть в избранном
+    except DoesNotExist:
+        return False
+
+async def delete_favorite(tg_id, iid):
+    try:
+        user = await User.get(tg_id=tg_id)
+        idea = await Idea.get(id=iid)
+        favorite_record = await Favorite.filter(user=user, idea=idea).first()
+        if favorite_record:
+            await favorite_record.delete()
+            return True
+        else:
+            return False
+    except DoesNotExist:
+        return False
 
 async def find_best_matching_ideas(material_list):
     # Получаем все материалы из базы данных
@@ -50,26 +124,6 @@ async def revert_idea_to_text(id: int):
     if image:
         return text, image
     return text, False
-
-async def add_to_favorite(tg_id: int,iid: int):  # создание пользователя
-    try:
-        idea = await Idea.get(id=iid)
-        user = await User.get(tg_id=tg_id)
-    except DoesNotExist:
-        return False
-    await Favorite.get_or_create(user=user,idea=idea)
-    return True
-    
-async def delete_favorite(tg_id: int,iid: int):  # создание пользователя
-    try:
-        idea = await Idea.get(id=iid)
-        user = await User.get(tg_id=tg_id)
-    except DoesNotExist:
-        return False
-    favorite = await Favorite.get(user=user,idea=idea)
-    if favorite:
-        await favorite.delete()
-    return True
 
 async def get_soap_img(data):
     mapping = {

@@ -4,15 +4,30 @@ from aiogram.types import (
     InlineKeyboardMarkup,
     InlineKeyboardButton,
 )
-from aiogram.utils.keyboard import ReplyKeyboardBuilder, InlineKeyboardBuilder
+from aiogram.utils.keyboard import InlineKeyboardBuilder
 
-from app.database.models import Material, User, Question, Answers
+from tortoise.exceptions import DoesNotExist
+from app.database.models import Favorite, Idea, Material, User, Question, Answers
 
 # Главное меню
 start_kb = InlineKeyboardMarkup(
     inline_keyboard=[
         [InlineKeyboardButton(text='Войти (автоматически) 🔓', callback_data='join_to_account')],
         [InlineKeyboardButton(text='Пропустить (или позже в настройках) ⏭️', callback_data='skip')]
+    ]
+)
+
+auth_kb = InlineKeyboardMarkup(
+    inline_keyboard=[
+        [InlineKeyboardButton(text='Авторизоватся 🔓', callback_data='join_to_account')],
+        [InlineKeyboardButton(text='назад ⏭️', callback_data='skip')]
+    ]
+)
+
+delete_account_kb = InlineKeyboardMarkup(
+    inline_keyboard=[
+        [InlineKeyboardButton(text='Удалить ❌', callback_data='submit_delete_account')],
+        [InlineKeyboardButton(text='назад ⏭️', callback_data='skip')]
     ]
 )
 
@@ -30,6 +45,20 @@ empty_kb = ReplyKeyboardMarkup(
     resize_keyboard=True
 )
 
+async def profile_kb(tg_id):
+    keyboard = InlineKeyboardBuilder()
+    user = await User.get(tg_id=tg_id)
+    list_favorite = await Favorite.filter(user=user).all()
+    for favorite in list_favorite:
+        idea = await favorite.idea
+        keyboard.add(InlineKeyboardButton(text=idea.description, callback_data=f'idea_{idea.id}'))
+    
+    keyboard.add(InlineKeyboardButton(text='Домой🏠', callback_data='skip'))
+    keyboard.add(InlineKeyboardButton(text='Удалить мой аккаунт❌', callback_data='delete_account'))
+    return keyboard.adjust(1).as_markup()
+    
+    
+    
 async def materials_kb():
     """
     Создает клавиатуру для выбора материалов.
@@ -89,7 +118,7 @@ async def favorites_kb(tg_id, idea_id, status):
     user = await User.filter(tg_id=tg_id).first()
 
     if user:
-        if status:
+        if not status:
             keyboard.row(InlineKeyboardButton(text='Добавить в избранное ⭐', callback_data=f'favorite_{idea_id}'))
         else:
             keyboard.row(InlineKeyboardButton(text='Удалить из избранного ❌⭐', callback_data=f'unfavorite_{idea_id}'))

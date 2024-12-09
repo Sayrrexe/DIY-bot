@@ -67,7 +67,7 @@ async def skip_cmd(callback: CallbackQuery, state: FSMContext):
     await state.clear()
     await callback.message.delete()
     await callback.message.answer(
-        "Вы находитесь в главном меню 🏠! Используйте кнопки ниже для взаимодействия.",
+        "Вы находитесь в главном меню 🏠! \nИспользуйте кнопки ниже для взаимодействия.",
         reply_markup=kb.main_kb,
     )
 
@@ -75,7 +75,7 @@ async def skip_cmd(callback: CallbackQuery, state: FSMContext):
 # --- Обработчики идей ---
 
 
-@user.message(F.text == "Получить идею🌟")
+@user.message(F.text == "Получить идею 🌟")
 async def cmd_get_idea(message: Message, state: FSMContext):
     """
     Начинает процесс выбора материалов для генерации идеи.
@@ -83,7 +83,7 @@ async def cmd_get_idea(message: Message, state: FSMContext):
     await message.delete()
     await state.update_data(materials=[])
     await message.answer(
-        "Из списка ниже выберите материалы 🧩:\n\n• ",
+        "Из списка ниже выберите, те материалы, которые у вас есть\nОни появятся в списке ниже:\n\n• ",
         reply_markup=await kb.materials_kb(),
     )
 
@@ -96,7 +96,7 @@ async def cmd_clear_materials(callback: CallbackQuery, state: FSMContext):
     await callback.message.delete()
     await state.update_data(materials=[])
     await callback.message.answer(
-        "Из списка ниже выберите материалы 🧩:\n\n• ",
+        "Из списка ниже выберите, те материалы, которые у вас есть\nОни появятся в списке ниже:\n\n• ",
         reply_markup=await kb.materials_kb(),
     )
 
@@ -114,7 +114,7 @@ async def cmd_add_material(callback: CallbackQuery, state: FSMContext):
     if edited:
         await state.update_data(materials=new_materials)
         await callback.message.edit_text(
-            text=f"Материал обновлён: {new_text} 🛠️",
+            text=new_text,
             reply_markup=await kb.materials_kb(),
         )
 

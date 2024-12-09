@@ -1,7 +1,8 @@
 import logging
+import os
 
 from aiogram import Router, F
-from aiogram.types import Message, CallbackQuery
+from aiogram.types import Message, CallbackQuery, FSInputFile
 from aiogram.filters import CommandStart, Command
 from aiogram.fsm.context import FSMContext
 
@@ -108,38 +109,61 @@ async def cmd_accept_materials(callback: CallbackQuery, state: FSMContext):
 
 @user.callback_query(F.data.startswith("idea_"))
 async def cmd_show_idea(callback: CallbackQuery, state: FSMContext):
-    """Отобразить выбранную идею."""
+    """Отобразить выбранную идею с фото и текстом."""
     idea_id = callback.data.split("_")[1]
-    text = await req.revert_idea_to_text(idea_id)
-    await callback.message.answer(
-        text, 
-        reply_markup=await kb.favorites_kb(callback.from_user.id, idea_id, True)
-    )
+    text, image_path = await req.revert_idea_to_text(idea_id)
+    
+    if image_path and os.path.exists(image_path):
+        try:
+            await callback.message.answer_photo(
+                photo=FSInputFile(image_path, filename="idea_image.png"), 
+                caption=text,
+                reply_markup=await kb.favorites_kb(callback.from_user.id, idea_id, True)
+            )
+        except Exception as e:
+            logger.error(f"Ошибка при отправке фото: {e}")
+            await callback.message.answer(
+                text, 
+                reply_markup=await kb.favorites_kb(callback.from_user.id, idea_id, True)
+            )
+    else:
+        await callback.message.answer(
+            text, 
+            reply_markup=await kb.favorites_kb(callback.from_user.id, idea_id, True)
+        )
 
 @user.callback_query(F.data.startswith("favorite_"))
 async def cmd_favorite_idea(callback: CallbackQuery, state: FSMContext):
-    """Добавить идею в избранное."""
+    """Добавить идею в избранное и обновить только клавиатуру."""
     idea_id = callback.data.split("_")[1]
-    text = callback.message.text + '\n'
     added = await req.add_to_favorite(iid=idea_id, tg_id=callback.from_user.id)
+    
     if not added:
         await callback.message.answer('Вы не авторизованы! 🚫')
-    else:
-        await callback.message.edit_text(
-            text=text,
+        return
+    
+    try:
+        await callback.message.edit_reply_markup(
             reply_markup=await kb.favorites_kb(callback.from_user.id, idea_id, False)
         )
+    except Exception as e:
+        logger.error(f"Ошибка при обновлении клавиатуры (добавление в избранное): {e}")
+        await callback.message.answer('Не удалось обновить клавиатуру. Попробуйте позже.')
 
 @user.callback_query(F.data.startswith("unfavorite_"))
 async def cmd_unfavorite_idea(callback: CallbackQuery, state: FSMContext):
-    """Удалить идею из избранного."""
+    """Удалить идею из избранного и обновить только клавиатуру."""
     idea_id = callback.data.split("_")[1]
-    text = callback.message.text + '\n'
     removed = await req.delete_favorite(iid=idea_id, tg_id=callback.from_user.id)
+    
     if not removed:
         await callback.message.answer('Вы не авторизованы! 🚫')
-    else:
-        await callback.message.edit_text(
-            text=text,
+        return
+    
+    try:
+        await callback.message.edit_reply_markup(
             reply_markup=await kb.favorites_kb(callback.from_user.id, idea_id, True)
         )
+    except Exception as e:
+        logger.error(f"Ошибка при обновлении клавиатуры (удаление из избранного): {e}")
+        await callback.message.answer('Не удалось обновить клавиатуру. Попробуйте позже.')

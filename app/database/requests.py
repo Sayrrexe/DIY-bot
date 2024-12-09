@@ -43,16 +43,18 @@ async def find_best_matching_ideas(material_list):
     return top_ideas
 
 
-async def revert_idea_to_text(id: int):  # создание пользователя
+async def revert_idea_to_text(id: int):
     idea = await Idea.get(id=id)
     text = f'Идея: {idea.description}\n\n{idea.instruction}'
-    return text
+    image = idea.image
+    if image:
+        return text, image
+    return text, False
 
 async def add_to_favorite(tg_id: int,iid: int):  # создание пользователя
     try:
         idea = await Idea.get(id=iid)
         user = await User.get(tg_id=tg_id)
-        print(user.id)
     except DoesNotExist:
         return False
     await Favorite.get_or_create(user=user,idea=idea)

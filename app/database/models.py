@@ -37,6 +37,7 @@ class Idea(Model):
     description = fields.TextField()
     instruction = fields.TextField()
     materials = fields.ManyToManyField('models.Material', related_name='ideas')
+    image = fields.CharField(max_length=255, null=True)
     
 
     def __str__(self):

@@ -1,5 +1,8 @@
 from aiogram.fsm.state import State, StatesGroup
 
 
-#class CreateAutoFSM(StatesGroup):
-#    user = State()
+class QuestionsFsm(StatesGroup):
+    user = State()
+    color = State()
+    form = State()
+    additives = State()

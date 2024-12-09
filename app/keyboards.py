@@ -6,7 +6,7 @@ from aiogram.types import (
 )
 from aiogram.utils.keyboard import ReplyKeyboardBuilder, InlineKeyboardBuilder
 
-from app.database.models import Material, User
+from app.database.models import Material, User, Question, Answers
 
 # Главное меню
 start_kb = InlineKeyboardMarkup(
@@ -22,6 +22,11 @@ main_kb = ReplyKeyboardMarkup(
         [KeyboardButton(text='Создать мыло🧼')],
         [KeyboardButton(text='Профиль🏠')]
     ],
+    resize_keyboard=True
+)
+
+empty_kb = ReplyKeyboardMarkup(
+    keyboard=[],
     resize_keyboard=True
 )
 
@@ -100,3 +105,26 @@ async def favorites_kb(tg_id, idea_id, status):
     )
 
     return keyboard.as_markup()
+
+async def get_cb_by_status_questions(status):
+    keyboard = InlineKeyboardBuilder()
+    
+    
+    if status == 'color':
+        question = await Question.get(id=2).prefetch_related('answers')
+        related_answers = await question.answers.all()
+        id = 1
+    if status == 'form':
+        question = await Question.get(id=1).prefetch_related('answers')
+        related_answers = await question.answers.all()
+        id = 2
+    if status == 'additives':
+        question = await Question.get(id=3).prefetch_related('answers')
+        related_answers = await question.answers.all()
+        id = 3
+    
+    for answer in related_answers:
+        keyboard.row(InlineKeyboardButton(text=answer.answer, callback_data=f'answer_{id}_{answer.id}'))
+        
+    return keyboard.as_markup()
+        

@@ -1,3 +1,4 @@
+from email import message
 import logging
 import os
 
@@ -170,3 +171,41 @@ async def cmd_unfavorite_idea(callback: CallbackQuery, state: FSMContext):
         
         
 # ----- Свечи -----
+
+@user.message(F.text == 'Создать мыло🧼')
+async def create_soap_cmd(message: Message, state: FSMContext):
+    await message.delete()
+    await message.answer('Для создания вашего мыло, нужно будет ответить на несколько вопросов!', reply_markup=kb.empty_kb)
+    await state.set_state(st.QuestionsFsm.color)
+    await message.answer('Самое главное это цвет, давайте выберем его, нажмите на 1 из предложенных', reply_markup=await kb.get_cb_by_status_questions('color'))
+    
+    
+@user.callback_query(F.data.startswith("answer_1_"))
+async def cmd_unfavorite_idea(callback: CallbackQuery, state: FSMContext):
+    """ответ на вопрос про цвет."""
+    await callback.message.delete()
+    answer_id = callback.data.split("_")[2]
+    await state.update_data(color = answer_id)
+    await state.set_state(st.QuestionsFsm.form)
+    await callback.message.answer('Неменее важна и Форма, ведь она радует глаз и позволяет удобно пользоватся мылом', reply_markup=await kb.get_cb_by_status_questions('form'))
+    
+@user.callback_query(F.data.startswith("answer_2_"))
+async def cmd_unfavorite_idea(callback: CallbackQuery, state: FSMContext):
+    """ответ на вопрос про цвет."""
+    await callback.message.delete()
+    answer_id = callback.data.split("_")[2]
+    await state.update_data(form = answer_id)
+    await state.set_state(st.QuestionsFsm.form)
+    await callback.message.answer('На последок, выберите 1 добавление к вашему мылу из списка:\n', reply_markup=await kb.get_cb_by_status_questions('additives'))
+    
+@user.callback_query(F.data.startswith("answer_3_"))
+async def cmd_unfavorite_idea(callback: CallbackQuery, state: FSMContext):
+    """ответ на вопрос про цвет."""
+    await callback.message.delete()
+    answer_id = callback.data.split("_")[2]
+    await state.update_data(additives = answer_id)
+    print(await state.get_data())
+    
+    
+
+

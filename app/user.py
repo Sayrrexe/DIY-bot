@@ -223,7 +223,7 @@ async def cmd_unfavorite_idea(callback: CallbackQuery, state: FSMContext):
 # --- Обработчики создания мыла ---
 
 
-@user.message(F.text == "Создать мыло🧼")
+@user.message(F.text == "Создать мыло 🧼")
 async def create_soap_cmd(message: Message, state: FSMContext):
     """
     Начинает процесс создания мыла, задавая вопросы пользователю.
@@ -299,7 +299,7 @@ async def answer_additives(callback: CallbackQuery, state: FSMContext):
 # --- Обработчики профиля ---
 
 
-@user.message(F.text == "Профиль🏠")
+@user.message(F.text == "Профиль 🏠")
 async def profile_cmd(message: Message, state: FSMContext):
     """
     Отображает профиль пользователя.
@@ -307,7 +307,7 @@ async def profile_cmd(message: Message, state: FSMContext):
     await message.delete()
     user_auth = await req.is_user_auth(message.from_user.id)
     if not user_auth:
-        await message.answer("Вы не авторизованы, хотите авторизоваться?")
+        await message.answer("Вы не авторизованы, пропишите /start для авторизации")
         return
     count = await req.get_count_user_favorite(message.from_user.id)
     await message.answer(

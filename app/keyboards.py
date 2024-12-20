@@ -6,7 +6,7 @@ from aiogram.types import (
 )
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
-from app.database.models import Favorite, Idea, Material, User, Question
+from app.database.models import Favorite,Material, User, Question
 
 # Главное меню
 start_kb = InlineKeyboardMarkup(

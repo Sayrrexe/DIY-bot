@@ -14,9 +14,8 @@ from app.utils import clear_text
 logger = logging.getLogger(__name__)
 user = Router()
 
+
 # --- Обработчики команд ---
-
-
 @user.message(Command("id"))
 async def cmd_id(message: Message):
     """
@@ -194,7 +193,6 @@ async def cmd_show_idea(callback: CallbackQuery, state: FSMContext):
                     callback.from_user.id, int(idea_id), status
                 ),
             )
-        
 
 
 @user.callback_query(F.data.startswith("favorite_"))

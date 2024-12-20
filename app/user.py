@@ -1,5 +1,4 @@
 import logging
-from operator import call
 import os
 
 from aiogram import Router, F

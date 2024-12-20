@@ -3,7 +3,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-TOKEN = os.getenv("TOKEN")
+TOKEN = '7810887853:AAGz3C_UXiE-WgwMsFYr_xCeXCS2SQAhI58'
 DB_URL = "sqlite://db.sqlite3"
 
 # sqlite

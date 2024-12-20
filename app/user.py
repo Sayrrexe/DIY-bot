@@ -143,18 +143,25 @@ async def cmd_show_idea(callback: CallbackQuery, state: FSMContext):
     idea_id = callback.data.split("_")[1]
     text, image_path = await req.revert_idea_to_text(int(idea_id))
     status = await req.is_idea_favorite(callback.from_user.id, int(idea_id))
-
-    if image_path and os.path.exists(image_path):
-        try:
-            await callback.message.answer_photo(
-                photo=FSInputFile(image_path, filename="idea_image.png"),
-                caption=text,
-                reply_markup=await kb.favorites_kb(
-                    callback.from_user.id, int(idea_id), status
-                ),
-            )
-        except Exception as e:
-            logger.error(f"Ошибка при отправке фото: {e}")
+    if len(text) <= 1024:
+        if image_path and os.path.exists(image_path):
+            try:
+                await callback.message.answer_photo(
+                    photo=FSInputFile(image_path, filename="idea_image.png"),
+                    caption=text,
+                    reply_markup=await kb.favorites_kb(
+                        callback.from_user.id, int(idea_id), status
+                    ),
+                )
+            except Exception as e:
+                logger.error(f"Ошибка при отправке фото: {e}")
+                await callback.message.answer(
+                    text,
+                    reply_markup=await kb.favorites_kb(
+                        callback.from_user.id, int(idea_id), status
+                    ),
+                )
+        else:
             await callback.message.answer(
                 text,
                 reply_markup=await kb.favorites_kb(
@@ -162,12 +169,33 @@ async def cmd_show_idea(callback: CallbackQuery, state: FSMContext):
                 ),
             )
     else:
-        await callback.message.answer(
-            text,
-            reply_markup=await kb.favorites_kb(
-                callback.from_user.id, int(idea_id), status
-            ),
-        )
+        if image_path and os.path.exists(image_path):
+            try:
+                await callback.message.answer_photo(
+                    photo=FSInputFile(image_path, filename="idea_image.png"),
+                )
+                await callback.message.answer(
+                    text=text,
+                    reply_markup=await kb.favorites_kb(
+                        callback.from_user.id, int(idea_id), status
+                    ),
+                )
+            except Exception as e:
+                logger.error(f"Ошибка при отправке фото: {e}")
+                await callback.message.answer(
+                    text,
+                    reply_markup=await kb.favorites_kb(
+                        callback.from_user.id, int(idea_id), status
+                    ),
+                )
+        else:
+            await callback.message.answer(
+                text,
+                reply_markup=await kb.favorites_kb(
+                    callback.from_user.id, int(idea_id), status
+                ),
+            )
+        
 
 
 @user.callback_query(F.data.startswith("favorite_"))
